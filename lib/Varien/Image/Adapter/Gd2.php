@@ -82,12 +82,21 @@ class Varien_Image_Adapter_Gd2 extends Varien_Image_Adapter_Abstract
      */
     protected function _convertToByte($memoryValue)
     {
-        if (stripos($memoryValue, 'M') !== false) {
-            return (int)$memoryValue * 1024 * 1024;
-        } elseif (stripos($memoryValue, 'KB') !== false) {
-            return (int)$memoryValue * 1024;
+        $returnValue = 1;
+        switch (true) {
+            case (intval($memoryValue) === -1) :
+                $returnValue = 268435456; // 256M should be fine for most cases in cli
+                break;
+            case (stripos($memoryValue, 'G') !== false) :
+                $returnValue *= 1024;
+            case (stripos($memoryValue, 'M') !== false) :
+                $returnValue *= 1024;
+            case (stripos($memoryValue, 'KB') !== false) :
+                $returnValue *= 1024;
+            default:
+                $returnValue *= intval($memoryValue);
         }
-        return (int)$memoryValue;
+        return $returnValue;
     }
 
     public function save($destination=null, $newName=null)
